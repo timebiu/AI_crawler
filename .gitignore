@@ -1,0 +1,12 @@
+# compiled output
+
+
+# Logs
+logs
+*.log
+
+# OS
+.DS_Store
+
+# IDE - PyCharm
+.idea/*
