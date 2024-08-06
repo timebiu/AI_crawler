@@ -1,11 +1,20 @@
+import asyncio
+
+from crawlee.playwright_crawler import PlaywrightCrawler
+
+from routes import router
 
 
-def print_hi(name):
-    # 在下面的代码行中使用断点来调试脚本。
-    print(f'Hi, {name}')  # 按 Ctrl+F8 切换断点。
+async def main() -> None:
+    crawler = PlaywrightCrawler(
+        # Let's limit our crawls to make our tests shorter and safer.
+        max_requests_per_crawl=50,
+        # Provide our router instance to the crawler.
+        request_handler=router,
+    )
+
+    await crawler.run(['https://www.163.com/dy/media/T1472562728078.html'])
 
 
-# 按间距中的绿色按钮以运行脚本。
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
+    asyncio.run(main())
