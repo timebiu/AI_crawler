@@ -2,6 +2,7 @@ import asyncio
 
 # Instead of BeautifulSoupCrawler let's use Playwright to be able to render JavaScript.
 from crawlee.playwright_crawler import PlaywrightCrawler, PlaywrightCrawlingContext
+from extract import extract_text, extract_url
 
 
 async def main() -> None:
@@ -15,18 +16,27 @@ async def main() -> None:
 
         # Execute a function within the browser context to target the collection card elements
         # and extract their text content, trimming any leading or trailing whitespace.
-        category_texts = await context.page.eval_on_selector_all(
+        category_all = await context.page.eval_on_selector_all(
             '.title',
-            '(els) => els.map(el => el.textContent.trim())',
+            '(els) => els.map(el => el.outerHTML)',
         )
         category_time = await context.page.eval_on_selector_all(
             '.time',
             '(els) => els.map(el => el.textContent.trim())',
         )
-
+        category_titles = [extract_text(el) for el in category_all]
+        category_urls = [extract_url(el) for el in category_all]
         # Log the extracted texts.
-        for i, text in enumerate(category_texts):
-            context.log.info(f'CATEGORY_{i + 1}: {text}, time: {category_time[i]}')
+        data = []
+        for i, text in enumerate(category_titles):
+            context.log.info(f'CATEGORY_{i + 1}: {text}, time: {category_time[i]}, url: {category_urls[i]}')
+            data.append({
+                'title': text,
+                'time': category_time[i],
+                'url': category_urls[i]
+            })
+
+        await context.push_data(data)
 
     await crawler.run(['https://www.163.com/dy/media/T1472562728078.html'])
 
